@@ -16,7 +16,7 @@ import pickle
 from tqdm import tqdm
 from ..datatypes import (
     FashionItem, 
-    FashionCompatibilityQuery, 
+    FashionCompatibilityQuery,
     FashionComplementaryQuery, 
     FashionCompatibilityData, 
     FashionFillInTheBlankData, 
@@ -317,6 +317,7 @@ class PolyvoreItemDataset(Dataset):
         
 if __name__ == '__main__':
     # Test the dataset
+    import pdb; pdb.set_trace()
     dataset_dir = "/home/owj0421/datasets/polyvore"
     
     dataset = PolyvoreCompatibilityDataset(

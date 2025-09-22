@@ -79,6 +79,7 @@ def setup_dataloaders(rank, world_size, args):
 
 def compute(rank: int, world_size: int, args: Any):  
     # Setup
+
     setup(rank, world_size)
     
     # Logging Setup
@@ -124,11 +125,17 @@ def compute(rank: int, world_size: int, args: Any):
 
 if __name__ == '__main__':
     args = parse_args()
-    
+
     if args.world_size == -1:
         args.world_size = torch.cuda.device_count()
-        
-    mp.spawn(
-        compute, args=(args.world_size, args), 
-        nprocs=args.world_size, join=True
-    )
+
+    if args.world_size > 0:
+        mp.spawn(
+            compute,
+            args=(args.world_size, args),
+            nprocs=args.world_size,
+            join=True
+        )
+    else:
+        args.world_size = 1
+        compute(0, args.world_size, args)

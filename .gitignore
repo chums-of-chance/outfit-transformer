@@ -4,9 +4,12 @@ results/
 stores/
 datasets/
 logs/
+outfit-transformer/
 *.db
 *.faiss
 *.zip
+*.DS_Store
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
