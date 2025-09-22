@@ -66,7 +66,7 @@ def validation(args):
 
     test_dataloader = DataLoader(
         dataset=test, batch_size=args.batch_sz_per_gpu, shuffle=False,
-        num_workers=args.n_workers_per_gpu, collate_fn=collate_fn.fitb_collate_fn
+        num_workers=args.n_workers_per_gpu, collate_fn=collate_fn.triplet_collate_fn
     )
 
 
