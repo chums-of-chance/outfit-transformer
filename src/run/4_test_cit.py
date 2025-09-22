@@ -69,7 +69,7 @@ def validation(args):
         num_workers=args.n_workers_per_gpu, collate_fn=collate_fn.fitb_collate_fn
     )
 
-    pdb.set_trace()
+
     item_dataset = polyvore.PolyvoreItemDataset(
         dataset_dir=args.polyvore_dir,
         metadata=metadata,
