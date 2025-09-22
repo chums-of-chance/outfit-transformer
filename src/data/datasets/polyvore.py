@@ -318,7 +318,7 @@ class PolyvoreItemDataset(Dataset):
 if __name__ == '__main__':
     # Test the dataset
     import pdb; pdb.set_trace()
-    dataset_dir = "/home/owj0421/datasets/polyvore"
+    dataset_dir = "/home/xarchakosi/outfit-transformer/datasets/polyvore"
     
     dataset = PolyvoreCompatibilityDataset(
         dataset_dir,
