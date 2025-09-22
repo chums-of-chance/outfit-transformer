@@ -8,8 +8,6 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import wandb
-
 from ..data import collate_fn
 from ..data.datasets import polyvore
 from ..evaluation.metrics import compute_cir_scores
@@ -88,7 +86,7 @@ def validation(args):
 
 
     import pdb; pdb.set_trace()
-    
+
     for i, data in enumerate(pbar):
         if args.demo and i > 2:
             break
