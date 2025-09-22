@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 import pdb
 
 import numpy as np
+from random import sample
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -75,8 +76,8 @@ def validation(args):
         embedding_dict=embedding_dict
     )
 
-    pdb.set_trace()
-    all_items = list(item_dataset)
+
+    all_items = sample(list(item_dataset), 500)
 
     model = load_model(model_type=args.model_type, checkpoint=args.checkpoint)
     model.eval()
