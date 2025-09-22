@@ -2,6 +2,7 @@ import json
 import os
 import pathlib
 from argparse import ArgumentParser
+import pdb
 
 import numpy as np
 import torch
@@ -52,6 +53,7 @@ def validation(args):
     metadata = polyvore.load_metadata(args.polyvore_dir)
     embedding_dict = polyvore.load_embedding_dict(args.polyvore_dir)
 
+    pdb.set_trace()
     test = polyvore.PolyvoreTripletDataset(
         dataset_dir=args.polyvore_dir,
         dataset_type=args.polyvore_type,
@@ -59,11 +61,14 @@ def validation(args):
         metadata=metadata,
         embedding_dict=embedding_dict
     )
+    
+    pdb.set_trace()
     test_dataloader = DataLoader(
         dataset=test, batch_size=args.batch_sz_per_gpu, shuffle=False,
         num_workers=args.n_workers_per_gpu, collate_fn=collate_fn.fitb_collate_fn
     )
 
+    pdb.set_trace()
     item_dataset = polyvore.PolyvoreItemDataset(
         dataset_dir=args.polyvore_dir,
         metadata=metadata,
@@ -85,7 +90,7 @@ def validation(args):
     all_preds, all_labels = [], []
 
 
-    import pdb; pdb.set_trace()
+    pdb.set_trace()
 
     for i, data in enumerate(pbar):
         if args.demo and i > 2:
