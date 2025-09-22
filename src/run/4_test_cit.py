@@ -99,10 +99,12 @@ def validation(args):
             break
 
         batched_q_emb = model(data['query'], use_precomputed_embedding=True).unsqueeze(1)  # (batch_sz, 1, embedding_dim)
-        batched_c_embs = model(sum(data['candidates'], []),
-                               use_precomputed_embedding=True)  # (batch_sz * 4, embedding_dim)
-        batched_c_embs = batched_c_embs.view(-1, 4, batched_c_embs.shape[1])  # (batch_sz, 4, embedding_dim)
+        pdb.set_trace()
+        batched_recs_emb = torch.tensor([item_dataset.all_item_ids.index(
+                                        data['answer'][j].item_id)
+                                        for j in range(len(data['answer']))]).cuda()
 
+        pdb.set_trace()
         dists = torch.norm(batched_q_emb - batched_c_embs, dim=-1)  # (batch_sz, 4)
         preds = torch.argmin(dists, dim=-1)  # (batch_sz,)
         labels = torch.tensor(data['label']).cuda()
