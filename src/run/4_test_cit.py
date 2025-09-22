@@ -54,25 +54,46 @@ def validation(args):
     metadata = polyvore.load_metadata(args.polyvore_dir)
     embedding_dict = polyvore.load_embedding_dict(args.polyvore_dir)
 
-    test = polyvore.PolyvoreFillInTheBlankDataset(
-        dataset_dir=args.polyvore_dir, dataset_type=args.polyvore_type,
-        dataset_split='test', metadata=metadata, embedding_dict=embedding_dict
+    test = polyvore.PolyvoreTripletDataset(
+        dataset_dir=args.polyvore_dir,
+        dataset_type=args.polyvore_type,
+        dataset_split='test',
+        metadata=metadata,
+        embedding_dict=embedding_dict
     )
     test_dataloader = DataLoader(
         dataset=test, batch_size=args.batch_sz_per_gpu, shuffle=False,
         num_workers=args.n_workers_per_gpu, collate_fn=collate_fn.fitb_collate_fn
     )
 
+    item_dataset = polyvore.PolyvoreItemDataset(
+        dataset_dir=args.polyvore_dir,
+        metadata=metadata,
+        embedding_dict=embedding_dict
+    )
+
+    all_items = list(item_dataset)
+
     model = load_model(model_type=args.model_type, checkpoint=args.checkpoint)
     model.eval()
 
-    pbar = tqdm(test_dataloader, desc=f'[Test] Fill in the Blank')
+    with torch.no_grad():
+        all_item_embeddings = model(all_items, use_precomputed_embedding=True)  # (num_candidates, emb_dim)
+
+    print(f"Candidate pool size: {len(all_items)}")
+
+    pbar = tqdm(test_dataloader, desc=f'[Test] Triplet Dataset')
+
     all_preds, all_labels = [], []
+
+
+    import pdb; pdb.set_trace()
+    
     for i, data in enumerate(pbar):
         if args.demo and i > 2:
             break
-        batched_q_emb = model(data['query'], use_precomputed_embedding=True).unsqueeze(
-            1)  # (batch_sz, 1, embedding_dim)
+
+        batched_q_emb = model(data['query'], use_precomputed_embedding=True).unsqueeze(1)  # (batch_sz, 1, embedding_dim)
         batched_c_embs = model(sum(data['candidates'], []),
                                use_precomputed_embedding=True)  # (batch_sz * 4, embedding_dim)
         batched_c_embs = batched_c_embs.view(-1, 4, batched_c_embs.shape[1])  # (batch_sz, 4, embedding_dim)
