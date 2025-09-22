@@ -50,7 +50,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def validation(args):
+def validation(args, batch_candidate_embs):
     metadata = polyvore.load_metadata(args.polyvore_dir)
     embedding_dict = polyvore.load_embedding_dict(args.polyvore_dir)
 
@@ -65,7 +65,7 @@ def validation(args):
 
 
     test_dataloader = DataLoader(
-        dataset=test, batch_size=args.batch_sz_per_gpu, shuffle=False,
+        dataset=test, batch_size=1, shuffle=False,
         num_workers=args.n_workers_per_gpu, collate_fn=collate_fn.triplet_collate_fn
     )
 
@@ -91,54 +91,53 @@ def validation(args):
 
     all_preds, all_labels = [], []
 
-
-    pdb.set_trace()
-
     for i, data in enumerate(pbar):
         if args.demo and i > 2:
             break
 
-        batched_q_emb = model(data['query'], use_precomputed_embedding=True).unsqueeze(1)  # (batch_sz, 1, embedding_dim)
-        pdb.set_trace()
-        batched_recs_emb = torch.tensor([item_dataset.all_item_ids.index(
-                                        data['answer'][j].item_id)
-                                        for j in range(len(data['answer']))]).cuda()
+        # Compute query embeddings
+        batched_q_emb = model(data['query'], use_precomputed_embedding=True)  # (batch_sz, emb_dim)
+        labels = torch.tensor([item_dataset.all_item_ids.index(data['answer'][j].item_id)
+                               for j in range(len(data['answer']))]).cuda()
 
-        pdb.set_trace()
-        dists = torch.norm(batched_q_emb - batched_c_embs, dim=-1)  # (batch_sz, 4)
-        preds = torch.argmin(dists, dim=-1)  # (batch_sz,)
-        labels = torch.tensor(data['label']).cuda()
+        if batch_candidate_embs:
+            # Compute distances in batches to save memory
+            batch_size = 512  # adjust if needed
+            dists = []
+            for start in range(0, all_item_embeddings.shape[0], batch_size):
+                end = start + batch_size
+                cand_emb_batch = all_item_embeddings[start:end].unsqueeze(0)  # (1, batch, emb_dim)
+                q_exp = batched_q_emb.unsqueeze(1)  # (batch_sz, 1, emb_dim)
+                dists_batch = torch.norm(q_exp - cand_emb_batch, dim=-1)  # (batch_sz, batch)
+                dists.append(dists_batch)
+            dists = torch.cat(dists, dim=1)  # (batch_sz, num_candidates)
+        else:
+            q_exp = batched_q_emb.unsqueeze(1).repeat(1, all_item_embeddings.shape[0], 1)
+            dists = torch.norm(q_exp - all_item_embeddings.unsqueeze(0), dim=-1)
 
-        # Accumulate Results
+        preds = torch.argmin(dists, dim=-1)  # closest candidate
         all_preds.append(preds.detach())
         all_labels.append(labels.detach())
 
-        # Logging
+        # Optional: compute CIR score per batch
         score = compute_cir_scores(all_preds[-1], all_labels[-1])
-        logs = {
-            **score
-        }
-        pbar.set_postfix(**logs)
+        pbar.set_postfix(**score)
 
     all_preds = torch.cat(all_preds).cuda()
     all_labels = torch.cat(all_labels).cuda()
-    score = compute_cir_scores(all_preds, all_labels)
-    print(f"[Test] Fill in the Blank --> {score}")
+    final_score = compute_cir_scores(all_preds, all_labels)
+    print(f"[Test] Triplet Dataset --> {final_score}")
 
+    # Save results
     if args.checkpoint:
-        result_dir = os.path.join(
-            RESULT_DIR, args.checkpoint.split('/')[-2],
-        )
+        result_dir = os.path.join(RESULT_DIR, args.checkpoint.split('/')[-2])
     else:
-        result_dir = os.path.join(
-            RESULT_DIR, 'complementary_demo',
-        )
-    os.makedirs(
-        result_dir, exist_ok=True
-    )
-    with open(os.path.join(result_dir, f'results.json'), 'w') as f:
-        json.dump(score, f)
-    print(f"[Test] Fill in the Blank  --> Results saved to {result_dir}")
+        result_dir = os.path.join(RESULT_DIR, 'triplet_demo')
+    os.makedirs(result_dir, exist_ok=True)
+    with open(os.path.join(result_dir, 'results.json'), 'w') as f:
+        json.dump(final_score, f)
+    print(f"[Test] Triplet Dataset --> Results saved to {result_dir}")
+
 
 
 if __name__ == '__main__':
