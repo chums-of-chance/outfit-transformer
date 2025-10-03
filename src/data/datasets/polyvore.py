@@ -55,6 +55,7 @@ def load_metadata(dataset_dir):
 
 def load_embedding_dict(dataset_dir):
     e_dir = POLYVORE_PRECOMPUTED_CLIP_EMBEDDING_DIR.format(dataset_dir=dataset_dir)
+    import pdb; pdb.set_trace()
     filenames = [filename for filename in os.listdir(e_dir) if filename.endswith(".pkl")]
     filenames = sorted(filenames, key=lambda x: int(x.split('.')[0].split('_')[-1]))
     

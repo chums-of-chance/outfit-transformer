@@ -50,7 +50,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def validation(args, batch_candidate_embs):
+def validation(args):
     metadata = polyvore.load_metadata(args.polyvore_dir)
     embedding_dict = polyvore.load_embedding_dict(args.polyvore_dir)
 
@@ -79,6 +79,8 @@ def validation(args, batch_candidate_embs):
 
     all_items = sample(list(item_dataset), 500)
 
+    import pdb; pdb.set_trace()
+
     model = load_model(model_type=args.model_type, checkpoint=args.checkpoint)
     model.eval()
 
@@ -100,7 +102,8 @@ def validation(args, batch_candidate_embs):
         labels = torch.tensor([item_dataset.all_item_ids.index(data['answer'][j].item_id)
                                for j in range(len(data['answer']))]).cuda()
 
-        if batch_candidate_embs:
+        #if batch_candidate_embs:
+        if True:
             # Compute distances in batches to save memory
             batch_size = 512  # adjust if needed
             dists = []
@@ -111,9 +114,9 @@ def validation(args, batch_candidate_embs):
                 dists_batch = torch.norm(q_exp - cand_emb_batch, dim=-1)  # (batch_sz, batch)
                 dists.append(dists_batch)
             dists = torch.cat(dists, dim=1)  # (batch_sz, num_candidates)
-        else:
-            q_exp = batched_q_emb.unsqueeze(1).repeat(1, all_item_embeddings.shape[0], 1)
-            dists = torch.norm(q_exp - all_item_embeddings.unsqueeze(0), dim=-1)
+        #else:
+        #    q_exp = batched_q_emb.unsqueeze(1).repeat(1, all_item_embeddings.shape[0], 1)
+        #    dists = torch.norm(q_exp - all_item_embeddings.unsqueeze(0), dim=-1)
 
         preds = torch.argmin(dists, dim=-1)  # closest candidate
         all_preds.append(preds.detach())
