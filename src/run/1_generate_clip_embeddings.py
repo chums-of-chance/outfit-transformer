@@ -128,7 +128,8 @@ def compute(rank: int, world_size: int, args: Any):
 
 if __name__ == '__main__':
     args = parse_args()
-
+    import pdb;
+    pdb.set_trace()
     if args.world_size == -1:
         args.world_size = torch.cuda.device_count()
 
