@@ -79,8 +79,7 @@ def setup_dataloaders(rank, world_size, args):
 
 def compute(rank: int, world_size: int, args: Any):  
     # Setup
-    import pdb;
-    pdb.set_trace()
+
     setup(rank, world_size)
     
     # Logging Setup
@@ -88,8 +87,7 @@ def compute(rank: int, world_size: int, args: Any):
     logger.info(f'Logger Setup Completed')
     
     # Dataloaders
-    import pdb;
-    pdb.set_trace()
+
     item_dataloader = setup_dataloaders(rank, world_size, args)
     logger.info(f'Dataloaders Setup Completed')
     
@@ -128,8 +126,6 @@ def compute(rank: int, world_size: int, args: Any):
 
 if __name__ == '__main__':
     args = parse_args()
-    import pdb;
-    pdb.set_trace()
     if args.world_size == -1:
         args.world_size = torch.cuda.device_count()
 
