@@ -79,7 +79,8 @@ def setup_dataloaders(rank, world_size, args):
 
 def compute(rank: int, world_size: int, args: Any):  
     # Setup
-
+    import pdb;
+    pdb.set_trace()
     setup(rank, world_size)
     
     # Logging Setup
