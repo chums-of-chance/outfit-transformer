@@ -133,7 +133,7 @@ if __name__ == '__main__':
     if args.world_size == -1:
         args.world_size = torch.cuda.device_count()
 
-    if args.world_size > 0:
+    if args.world_size > 1:
         mp.spawn(
             compute,
             args=(args.world_size, args),
