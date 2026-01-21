@@ -308,9 +308,15 @@ if __name__ == '__main__':
     if torch.cuda.is_available():
         if args.world_size == -1:
             args.world_size = torch.cuda.device_count()
-        mp.spawn(
-            train, args=(args.world_size, args, wandb_run),
-            nprocs=args.world_size, join=True
-        )
+
+        if args.world_size > 1:
+            mp.spawn(
+                train,
+                args=(args.world_size, args, wandb_run),
+                nprocs=args.world_size,
+                join=True
+            )
+        else:
+            train(rank=0, world_size=1, args=args, wandb_run=wandb_run)
     else:
         train(rank=0, world_size=1, args=args, wandb_run=wandb_run)
