@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Literal, Optional
 
 import numpy as np
 import torch
-import torch.distributed as dist
+# import torch.distributed as dist
 import torch.multiprocessing as mp
 import torch.nn as nn
 import torch.optim as optim
@@ -80,14 +80,13 @@ def setup_dataloaders(rank, world_size, args):
 def compute(rank: int, world_size: int, args: Any):  
     # Setup
 
-    setup(rank, world_size)
+    # setup(rank, world_size)
     
     # Logging Setup
     logger = get_logger('precompute_clip_embedding', LOGS_DIR, rank)
     logger.info(f'Logger Setup Completed')
     
     # Dataloaders
-
     item_dataloader = setup_dataloaders(rank, world_size, args)
     logger.info(f'Dataloaders Setup Completed')
     
@@ -101,11 +100,11 @@ def compute(rank: int, world_size: int, args: Any):
         for batch in tqdm(item_dataloader):
             if args.demo and len(all_embeddings) > 10:
                 break
-            
-            if dist.get_world_size() > 1:
-                embeddings = model.module.precompute_clip_embedding(batch)  # (batch_size, d_embed)
-            else:
-                embeddings = model.precompute_clip_embedding(batch)
+
+            #if dist.get_world_size() > 1:
+            #    embeddings = model.module.precompute_clip_embedding(batch)  # (batch_size, d_embed)
+            #else:
+            embeddings = model.precompute_clip_embedding(batch)
             
             all_ids.extend([item.item_id for item in batch])
             all_embeddings.append(embeddings)

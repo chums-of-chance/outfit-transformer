@@ -224,7 +224,7 @@ def valid_step(
 def train(
     rank: int, world_size: int, args: Any,
     wandb_run: Optional[wandb.sdk.wandb_run.Run] = None
-):  
+):
     # Setup
     setup(rank, world_size)
     
@@ -296,18 +296,21 @@ def train(
 
 
 if __name__ == '__main__':
+
     args = parse_args()
-    
-    if args.world_size == -1:
-        args.world_size = torch.cuda.device_count()
-        
+
     if args.wandb_key:
         wandb.login(key=args.wandb_key)
         wandb_run = wandb.init(project='outfit-transformer-cp', config=args.__dict__)
     else:
         wandb_run = None
         
-    mp.spawn(
-        train, args=(args.world_size, args, wandb_run), 
-        nprocs=args.world_size, join=True
-    )
+    if torch.cuda.is_available():
+        if args.world_size == -1:
+            args.world_size = torch.cuda.device_count()
+        mp.spawn(
+            train, args=(args.world_size, args, wandb_run),
+            nprocs=args.world_size, join=True
+        )
+    else:
+        train(rank=0, world_size=1, args=args, wandb_run=wandb_run)

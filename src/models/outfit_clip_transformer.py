@@ -30,6 +30,7 @@ class OutfitCLIPTransformer(OutfitTransformer):
         
     def precompute_clip_embedding(self, item: List[FashionItem]) -> np.ndarray:
         """Precomputes the encoder(backbone) embeddings for a list of fashion items."""
+
         outfits = [[item_] for item_ in item]
         images, texts, mask = self._pad_and_mask_for_outfits(outfits)
         enc_outs = self.item_enc(images, texts) # [B, 1, D]

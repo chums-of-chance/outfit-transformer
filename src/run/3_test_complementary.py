@@ -35,7 +35,8 @@ def parse_args():
     parser.add_argument('--polyvore_type', type=str, choices=['nondisjoint', 'disjoint'],
                         default='nondisjoint')
     parser.add_argument('--batch_sz_per_gpu', type=int,
-                        default=512)
+                        #default=512)
+                        default=2)
     parser.add_argument('--n_workers_per_gpu', type=int,
                         default=4)
     parser.add_argument('--wandb_key', type=str, 
@@ -73,7 +74,7 @@ def validation(args):
         batched_q_emb = model(data['query'], use_precomputed_embedding=True).unsqueeze(1) # (batch_sz, 1, embedding_dim)
         batched_c_embs = model(sum(data['candidates'], []), use_precomputed_embedding=True) # (batch_sz * 4, embedding_dim)
         batched_c_embs = batched_c_embs.view(-1, 4, batched_c_embs.shape[1]) # (batch_sz, 4, embedding_dim)
-        
+
         dists = torch.norm(batched_q_emb - batched_c_embs, dim=-1) # (batch_sz, 4)
         preds = torch.argmin(dists, dim=-1) # (batch_sz,)
         labels = torch.tensor(data['label']).cuda()
