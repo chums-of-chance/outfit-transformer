@@ -49,7 +49,7 @@ def parse_args():
     parser.add_argument('--polyvore_type', type=str, choices=['nondisjoint', 'disjoint'],
                         default='nondisjoint')
     parser.add_argument('--batch_sz_per_gpu', type=int,
-                        default=512)
+                        default=128)
     parser.add_argument('--n_workers_per_gpu', type=int,
                         default=4)
     parser.add_argument('--n_epochs', type=int,
