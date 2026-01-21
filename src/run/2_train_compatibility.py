@@ -51,7 +51,7 @@ def parse_args():
     parser.add_argument('--batch_sz_per_gpu', type=int,
                         default=128)
     parser.add_argument('--n_workers_per_gpu', type=int,
-                        default=4)
+                        default=2)
     parser.add_argument('--n_epochs', type=int,
                         default=200)
     parser.add_argument('--lr', type=float,
