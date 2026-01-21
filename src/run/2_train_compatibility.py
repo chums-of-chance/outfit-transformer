@@ -306,14 +306,12 @@ if __name__ == '__main__':
         wandb_run = None
         
     if torch.cuda.is_available():
-        if args.world_size == -1:
-            args.world_size = torch.cuda.device_count()
-
-        if args.world_size > 1:
+        world_size = torch.cuda.device_count()  # read GPUs automatically
+        if world_size > 1:
             mp.spawn(
                 train,
-                args=(args.world_size, args, wandb_run),
-                nprocs=args.world_size,
+                args=(world_size, args, wandb_run),
+                nprocs=world_size,
                 join=True
             )
         else:
